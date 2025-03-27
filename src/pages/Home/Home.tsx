@@ -1,5 +1,5 @@
 import { useState, useEffect, ChangeEvent } from "react";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 import { ModelObject } from "../../models/ModelObject";
 import { ModelData } from "../../models/ModelData";
@@ -19,24 +19,48 @@ function Home() {
 
     const fetchObjects = async () => {
         //TODO Recuperar tots els objectes amb axios
+        axios.get(API_URL)
+        .then((response) => {
+            //setObjects(response.data);
+            console.log(response);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+
+        try {
+            const response : AxiosResponse<any, any> = await axios.get(API_URL);
+            const objectsData = response.data.map((obj : any) => { 
+                new ModelObject(obj.name, new ModelData(obj.data.photo, obj.data.description, obj.data.price), obj.id);
+            });
+            setObjects(objectsData);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const fetchObjectById = async () => {
         //TODO Recuperar un objecte per ID amb fetch
     };
-    
+
 
     const createObject = async () => {
         //TODO Crear un objecte per ID amb axios
+        axios.post(API_URL)
+        //.then(())
     };
 
     const updateObject = async (id: string) => {
         //TODO Actualitzar un objecte per ID amb fetch
+        // Es un put
+        if (!id) return ;
     };
-    
+
 
     const deleteObject = async (id: string) => {
         //TODO Eliminar un objecte per ID amb fetch o axios
+        if (!id) return;
+        axios.delete(API_URL + "/" + id)
     };
 
     //Actualitzar el valor de l'objecte de l'input
