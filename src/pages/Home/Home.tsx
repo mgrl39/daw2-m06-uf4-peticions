@@ -6,7 +6,7 @@ import { ModelData } from "../../models/ModelData";
 
 import "./Home.css";
 
-const API_URL = "http://192.168.236.234:8080/objects"; //S'ha de canviar localhost per la IP correcte
+const API_URL = "http://192.168.238.42:8080/objects"; //S'ha de canviar localhost per la IP correcte
 
 function Home() {
   const [objects, setObjects] = useState<ModelObject[]>([]); //Lista dels objectes a mostrar
@@ -32,13 +32,22 @@ function Home() {
 
   const fetchObjectById = async () => {
     //TODO Recuperar un objecte per ID amb fetch
-    //
+    try {
+      const response = await fetch(API_URL + "/" + objectId)
+      if (!response.ok) throw new Error("Error al recuperar l'objecte");
+      console.log(response);
+      setObjects(objects.filter(obj => obj.id === objectId));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
 
   const createObject = async () => {
     //TODO Crear un objecte per ID amb axios
-    axios.post(API_URL)
+    axios.post(API_URL, {
+
+    });
     //.then(())
   };
 
