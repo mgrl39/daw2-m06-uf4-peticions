@@ -6,7 +6,6 @@ import { ModelData } from "../../models/ModelData";
 
 import "./Home.css";
 
-// TODO bdl ad shi
 const API_URL = "http://192.168.238.42:8080/objects"; //S'ha de canviar localhost per la IP correcte
 
 function Home() {
@@ -53,14 +52,17 @@ function Home() {
   const fetchObjectById = async () => {
     //TODO Recuperar un objecte per ID amb fetch
     try {
+      // Si no hi ha ID, no es fa res.
+      if (!objectId.trim()) return;
       // Fem una peticio GET a l'endpoint especific. Concatenem el endpoint amb el ID.
       // L'ID l'agafem del input. Utilitzant el useState.
-      const response = await fetch(API_URL + "/" + objectId); // Podria ser `${API_URL}/${objectId}`
+      const response : Response = await fetch(API_URL + "/" + objectId); // Podria ser `${API_URL}/${objectId}`
       // console.log(response);
 
       // Comprovacio de si la resposta es correcta (status 200)
       // Amb axios no cal fer aquesta comprovacio manual.
       // Axios ja tira errors si la resposta no es correcta.
+      // Si no existeix s'executara.
       if (!response.ok) throw new Error("Error al recuperar l'objecte amb ID: " + objectId);
 
       // Conversio de la resposta a JSOn per poder transformarla a ModelObject.
@@ -74,14 +76,14 @@ function Home() {
         obj.id
       );
 
-      // Actualitzacio de la llista d'objectes per mostrar el nou objecte.
+      // Actualitzacio de la llista d'objectes per mostar unicament el recuperat.
       // setObjects espera un array de ModelObject. Com jo nomes vull mostrar un,
       // creeo un array amb el nou objecte. Es com un "envoltori" per contenir el nou objecte.
       setObjects([modelObj]);
     } catch (error) {
       // Si falla (api no respon, id no existeix, problema de connexio) entrem aqui.
       // Mostrem el missatge d'error a la consola.
-      console.error(error);
+      console.error("Error recuperant l'objecte amb ID " + objectId, error);
     }
   };
 
@@ -90,6 +92,7 @@ function Home() {
     try {
       // He afegit una comprovacio per si l'input esta buit o no te 4 parts.
       if (!newObject.trim() || newObject.trim().split(",").length != 4) return;
+      // if (Number.isNaN(Number(newObject.trim().split(",")[3]))) return;
       
       // Separacio de l'input en parts, es guarda a la llista de strings parts.
       const parts : string[] = newObject.split(",");
@@ -111,45 +114,57 @@ function Home() {
       // Resetejar el input
       setNewObject(""); 
     } catch (error) {
-      console.error(error);
+      console.error("Error creant l'objecte", error);
     }
   };
 
   const updateObject = async (id: string) => {
     //TODO Actualitzar un objecte per ID amb fetch
-    // Es un put, cuando hacemos el actaulizar tenemos que guardar los datos
-    // El input esta preparado para recibir un string plano.
-    // Por como funciona la api y la aplicacion si ponemos solo un valor la api va a seguir fnucionando igual.
-    // La aplicacion debe ser capaz de si metemos los 4 valors los pone los 4
-    if (!id) return;
+    // Es un put, aquest put quan es fa el canvi apareix l'objecte actualitzat 
+    // a l'ultima posicio de la llista.
+    if (!id.trim()) return;
 
     try {
-      const response = await fetch(API_URL + "/" + id, {
+      // Separacio de les dades de l'input en parts.
+      const parts: string[] = newObject.trim().split(",");
+      // Si no hi ha 4 parts, no es fa res.
+      if (parts.length != 4) return;
+      // if (Number.isNaN(Number(parts[3]?.trim()))) return;
+
+      // Si estan tots els valors, es crea un objecte amb les dades.
+      const objectToUpdate = {
+        name: parts[0]?.trim() || "",
+        data: {
+          photo: parts[1]?.trim() || "",
+          description: parts[2]?.trim() || "",
+          price: Number(parts[3]?.trim()) || 0,
+        },
+      };
+      
+      const response : Response = await fetch(API_URL + "/" + id, {
         method: "PUT",
+        // Sense els headers no podem dir-li que el body es un json. Per tant tira 415 Unsupported Media Type.
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: newObject,
-          data: {
-            photo: newObject,
-            description: newObject,
-            price: newObject,
-          },
-        }),
+        body: JSON.stringify(objectToUpdate),
       });
+      // Si la resposta no es correcta, es mostra un missatge d'error.
       if (!response.ok) throw new Error("Error actualitzant l'objecte" + id);
-      console.log("objecte" + id + " actualitzat");
-      fetchObjects();
+      // Si la resposta es correcta, es mostra un missatge de confirmacio.
+      console.log("Objecte amb ID " + id + " actualitzat");
+      // Actualitzem la llista d'objectes.
+      await fetchObjects();
     } catch (error) {
-      console.error("Error actualitzant l'objecte", error);
+      // Si hi ha hagut algun error es mostra a la consola.
+      console.error("Error actualitzant l'objecte amb ID " + id, error);
     }
   };
 
   const deleteObject = async (id: string) => {
     //TODO Eliminar un objecte per ID amb fetch o axios
     // Si no hi ha ID, no es fa res.
-    if (!id) return;
+    if (!id.trim()) return;
     try {
       // Peticio delete a l'API utilitzant axios
       await axios.delete(API_URL + "/" + id);
