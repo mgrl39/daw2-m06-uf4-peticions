@@ -1,5 +1,5 @@
 import { useState, useEffect, ChangeEvent } from "react";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 
 import { ModelObject } from "../../models/ModelObject";
 import { ModelData } from "../../models/ModelData";
@@ -22,7 +22,7 @@ function Home() {
     try {
       // Fem una peticio GET a l'API utilitzant axios. 
       // Axios reetorna un objecte de tipus AxiosResponse amb molta informació. (data, status, headers...)
-      const response: AxiosResponse<any, any> = await axios.get(API_URL);
+      const response = await axios.get(API_URL);
       // console.log(response); // Per veure la resposta de la API a la consola
       
       // Llista inicialment buida on es guardaran els objectes que estem recuperant de la API.
@@ -104,7 +104,7 @@ function Home() {
       };
 
       // Peticio post amb axios.
-      const response : AxiosResponse<any, any> = await axios.post(API_URL, myNewObjet);
+      const response = await axios.post(API_URL, myNewObjet);
       console.log("Producte creat amb ID: " + response.data.id);
 
       // Actualitzem la llista d'objectes, posem await ja que despres d'haver creat
