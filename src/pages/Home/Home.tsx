@@ -53,7 +53,7 @@ function Home() {
     //TODO Recuperar un objecte per ID amb fetch
     try {
       // Si no hi ha ID, no es fa res.
-      if (Number.isNaN(Number(objectId)) || !objectId.trim()) return;
+      if (!objectId.trim()) return;
       // Fem una peticio GET a l'endpoint especific. Concatenem el endpoint amb el ID.
       // L'ID l'agafem del input. Utilitzant el useState.
       const response : Response = await fetch(API_URL + "/" + objectId); // Podria ser `${API_URL}/${objectId}`
@@ -83,7 +83,7 @@ function Home() {
     } catch (error) {
       // Si falla (api no respon, id no existeix, problema de connexio) entrem aqui.
       // Mostrem el missatge d'error a la consola.
-      console.error(error);
+      console.error("Error recuperant l'objecte amb ID " + objectId, error);
     }
   };
 
@@ -114,7 +114,7 @@ function Home() {
       // Resetejar el input
       setNewObject(""); 
     } catch (error) {
-      console.error(error);
+      console.error("Error creant l'objecte", error);
     }
   };
 
@@ -129,7 +129,8 @@ function Home() {
       const parts: string[] = newObject.trim().split(",");
       // Si no hi ha 4 parts, no es fa res.
       if (parts.length != 4) return;
-      
+      // if (Number.isNaN(Number(parts[3]?.trim()))) return;
+
       // Si estan tots els valors, es crea un objecte amb les dades.
       const objectToUpdate = {
         name: parts[0]?.trim() || "",
@@ -150,7 +151,7 @@ function Home() {
       });
       // Si la resposta no es correcta, es mostra un missatge d'error.
       if (!response.ok) throw new Error("Error actualitzant l'objecte" + id);
-      // Mentre que si es correcta, es mostra un missatge de confirmacio.
+      // Si la resposta es correcta, es mostra un missatge de confirmacio.
       console.log("Objecte amb ID " + id + " actualitzat");
       // Actualitzem la llista d'objectes.
       await fetchObjects();
@@ -163,7 +164,7 @@ function Home() {
   const deleteObject = async (id: string) => {
     //TODO Eliminar un objecte per ID amb fetch o axios
     // Si no hi ha ID, no es fa res.
-    if (!id) return;
+    if (!id.trim()) return;
     try {
       // Peticio delete a l'API utilitzant axios
       await axios.delete(API_URL + "/" + id);
